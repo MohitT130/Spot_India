@@ -163,6 +163,7 @@ async function getClassifier(onProgress) {
 async function analyse() {
   show('analyse');
   $('analyse-thumb').src = state.photo;
+  $('analyse-wrap').classList.add('locking');
   $('analyse-err').hidden = true;
   setProgress(4);
   $('analyse-status').textContent = 'Loading the vision model…';
@@ -194,6 +195,7 @@ async function analyse() {
       .sort((a, b) => b.score - a.score);
 
     setProgress(100);
+    $('analyse-wrap').classList.remove('locking');
     decide(ranked);
   } catch (e) {
     $('analyse-err').textContent =
@@ -237,15 +239,28 @@ function renderConfirm() {
   $('verdict-name').textContent = c.name;
   $('verdict-sev').textContent = sev.label;
   $('verdict-sev').className = `sev sev-${c.severity}`;
+  // Category, confidence and severity read as chips on the photo itself.
+  $('chip-category').textContent = c.name;
+  $('chip-conf').textContent = state.confidence == null
+    ? 'Manual'
+    : `${Math.round(state.confidence * 100)}%`;
   $('verdict-conf').textContent = state.confidence == null
-    ? 'Chosen by you'
-    : `${Math.round(state.confidence * 100)}% confident · ${sev.blurb}`;
+    ? `Chosen by you. ${sev.blurb}`
+    : sev.blurb;
   // Categories that name people carry a caution the reporter sees up front.
   $('caution').innerHTML = c.caution || '';
   $('caution').hidden = !c.caution;
+  const cta = $('call-cta');
+  if (c.helpline) {
+    cta.href = `tel:${c.helpline}`;
+    cta.innerHTML = `<span>Call</span><span class="num">${c.helpline}</span><span>now</span>`;
+    cta.className = `call-cta${c.severity === 'critical' ? ' critical' : ''}`;
+    cta.hidden = false;
+  } else {
+    cta.hidden = true;
+  }
   $('verdict-auth').innerHTML =
     `Goes to <strong>${c.authority}</strong>`
-    + (c.helpline ? ` · <a class="helpline" href="tel:${c.helpline}">Call ${c.helpline} now</a>` : '')
     + (c.authority_dept ? `<br><small>${c.authority_dept}</small>` : '')
     + ((c.extra_helplines && c.extra_helplines.length)
         ? `<br><small class="muted">Also: ${c.extra_helplines
@@ -309,7 +324,7 @@ function buildPicker() {
       b.className = 'pick';
       b.innerHTML = `<span class="pick-name">${c.name}</span>
                      <span class="sev sev-${c.severity}">${state.cfg.severity[c.severity].label}</span>
-                     <span class="pick-auth">${c.authority}</span>`;
+                     <span class="pick-auth">Goes to ${c.authority}</span>`;
       b.onclick = () => {
         state.category = c.id;
         state.confidence = null;
@@ -393,6 +408,7 @@ async function review() {
     `<span class="sev sev-${sev.id}">${sev.label}</span>
      <span class="route-to"><strong>${a.public_name}</strong><br><small>${a.dept}</small></span>
      ${a.helpline ? `<a class="helpline" href="tel:${a.helpline}">Call ${a.helpline}</a>` : ''}`;
+  $('route-strip').classList.add('card');
   $('nearby-card').innerHTML = nb
     ? `<p class="nearby-head">Nearest help to the scene</p>
        <p class="nearby-main">${nb.name}<span class="nearby-dist">${nb.distance_km} km away</span></p>
@@ -475,6 +491,7 @@ function done(d) {
     <a class="ghost as-button" href="${L.mailto}">Send by email</a>
     <a class="ghost as-button" href="${L.tel}">Call the authority</a>
     <a class="ghost as-button" href="/track/${d.tracking_id}">Track this report</a>`;
+  // Severity drives the emergency button colour, same rule as the confirm step.
 
   try {
     const mine = JSON.parse(localStorage.getItem('spot_reports') || '[]');

@@ -3,14 +3,25 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#0b1020">
+<meta name="theme-color" content="#0B0F2A">
 <title>Report feed</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@800;900&family=Outfit:wght@500;600;700&family=JetBrains+Mono:wght@500;600&family=Noto+Sans+Telugu:wght@700&display=swap">
 <link rel="stylesheet" href="/static/styles.css">
 </head>
 <body>
 <header class="bar">
-  <div class="brand"><span class="dot"></span><span>Spot<strong>India</strong></span></div>
-  <nav class="bar-links"><a href="/">Report</a><a href="/track">Track</a></nav>
+  <div class="brand">
+    <span class="vf-bl" aria-hidden="true"></span>
+    <span class="vf-br" aria-hidden="true"></span>
+    <span class="wordmark">Spot India</span>
+    <p class="tagline">Report what you see.</p>
+  </div>
+  <nav class="bar-links">
+    <a href="/">Report</a>
+    <a href="/track">Track</a>
+  </nav>
 </header>
 
 <main>
@@ -56,11 +67,15 @@ async function load() {
       <li class="card">
         <div class="card-top">
           <a class="card-tid" href="/track/${r.tracking_id}">${r.tracking_id}</a>
-          <span class="sev sev-${r.severity}">${r.severity}</span>
+          <span class="card-tid">${fmt(r.created_at)}</span>
         </div>
-        <h2 style="margin-top:8px;font-size:16px">${r.category_name}</h2>
+        <h2>${r.category_name}</h2>
+        <div class="card-chips">
+          <span class="sev sev-${r.severity}">${r.severity}</span>
+          <span class="tag status-${r.status}">${String(r.status).replace('_', ' ')}</span>
+        </div>
         <p class="card-meta">${r.address_short || r.city || 'Location not recorded'}</p>
-        <p class="card-meta">${r.authority_name} · ${String(r.status).replace('_', ' ')} · ${fmt(r.created_at)}</p>
+        <p class="card-meta">Routed to ${r.authority_name}</p>
       </li>`).join('')}</ul>`;
   } catch {
     out.innerHTML = '<p class="err">Could not load the feed.</p>';

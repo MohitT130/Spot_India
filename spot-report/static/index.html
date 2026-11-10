@@ -3,16 +3,21 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#0b1020">
+<meta name="theme-color" content="#0B0F2A">
 <title>Spot India</title>
 <link rel="manifest" href="/manifest.webmanifest">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@800;900&family=Outfit:wght@500;600;700&family=JetBrains+Mono:wght@500;600&family=Noto+Sans+Telugu:wght@700&display=swap">
 <link rel="stylesheet" href="/static/styles.css">
 </head>
 <body>
 <header class="bar">
   <div class="brand">
-    <span class="dot" aria-hidden="true"></span>
-    <span>Spot<strong>India</strong></span>
+    <span class="vf-bl" aria-hidden="true"></span>
+    <span class="vf-br" aria-hidden="true"></span>
+    <span class="wordmark">Spot India</span>
+    <p class="tagline">Report what you see.</p>
   </div>
   <nav class="bar-links">
     <a href="/feed">Feed</a>
@@ -58,7 +63,12 @@
   <!-- 2. Analysing -->
   <section class="step" id="step-analyse" data-step="analyse" hidden>
     <h1>Analysing the photo</h1>
-    <img id="analyse-thumb" class="thumb" alt="Captured photo">
+    <span class="shot-wrap locking" id="analyse-wrap">
+      <span class="shot-media">
+        <img id="analyse-thumb" alt="Captured photo">
+        <span class="bracket tl" aria-hidden="true"></span><span class="bracket tr" aria-hidden="true"></span><span class="bracket bl" aria-hidden="true"></span><span class="bracket br" aria-hidden="true"></span>
+      </span>
+    </span>
     <div class="progress"><div class="progress-bar" id="progress-bar"></div></div>
     <p class="status" id="analyse-status">Loading the vision model…</p>
     <p class="hint" id="analyse-note">The model downloads once (about 50 MB) and is
@@ -70,18 +80,28 @@
   <!-- 3. Confirm category -->
   <section class="step" id="step-confirm" data-step="confirm" hidden>
     <h1>Is this right?</h1>
-    <img id="confirm-thumb" class="thumb" alt="Captured photo">
+    <span class="shot-wrap" id="confirm-wrap">
+      <span class="shot-media">
+        <img id="confirm-thumb" alt="Captured photo">
+        <span class="bracket tl" aria-hidden="true"></span><span class="bracket tr" aria-hidden="true"></span><span class="bracket bl" aria-hidden="true"></span><span class="bracket br" aria-hidden="true"></span>
+      </span>
+      <span class="shot-chips">
+        <span class="tag tag-amber" id="chip-category"></span>
+        <span class="tag tag-dark" id="chip-conf"></span>
+        <span class="sev" id="verdict-sev"></span>
+      </span>
+    </span>
 
     <p class="caution" id="caution" hidden></p>
 
     <div class="verdict" id="verdict">
       <div class="verdict-head">
-        <span class="sev" id="verdict-sev"></span>
         <h2 id="verdict-name"></h2>
       </div>
       <p class="confidence" id="verdict-conf"></p>
       <p class="routes-to" id="verdict-auth"></p>
     </div>
+    <a class="call-cta" id="call-cta" hidden></a>
 
     <div class="followup" id="followup" hidden>
       <label id="followup-q" for="followup-a"></label>
@@ -140,7 +160,7 @@
   <!-- 6. Review -->
   <section class="step" id="step-review" data-step="review" hidden>
     <h1>This is what gets sent</h1>
-    <p class="lede">Read it before it goes. Nothing here was invented by a
+    <p class="review-caption">Read it before it goes. Nothing here was invented by a
       language model: every line comes from your photo, your location and your note.</p>
 
     <div class="route-strip" id="route-strip"></div>
@@ -161,7 +181,10 @@
       <svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>
     </div>
     <h1>Report filed</h1>
-    <p class="tid" id="done-tid"></p>
+    <div class="tid-panel">
+      <p class="tid-label">Tracking code</p>
+      <p class="tid" id="done-tid"></p>
+    </div>
     <p class="lede" id="done-routed"></p>
 
     <div class="delivery" id="delivery-status"></div>
