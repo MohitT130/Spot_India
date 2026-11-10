@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b1020">
+<title>Track a report</title>
+<link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+<header class="bar">
+  <div class="brand"><span class="dot"></span><span>Spot<strong>India</strong></span></div>
+  <nav class="bar-links"><a href="/">Report</a><a href="/feed">Feed</a></nav>
+</header>
+
+<main>
+  <h1>Track a report</h1>
+  <p class="lede">Enter the code from your report, for example SPOT-251102-K7QX9F.</p>
+
+  <div class="row">
+    <input id="tid" type="text" placeholder="SPOT-..." autocapitalize="characters" autocomplete="off">
+    <button id="go" class="primary">Find</button>
+  </div>
+
+  <div id="out"></div>
+
+  <section id="mine" hidden>
+    <h2 style="margin:28px 0 10px">Reports from this device</h2>
+    <ul class="list" id="mine-list"></ul>
+  </section>
+</main>
+
+<script>
+const $ = (id) => document.getElementById(id);
+
+function fmt(ts) {
+  if (!ts) return '';
+  const d = new Date(ts);
+  return isNaN(d) ? String(ts) : d.toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' });
+}
+
+async function look(tid) {
+  const out = $('out');
+  out.innerHTML = '<p class="empty">Looking…</p>';
+  try {
+    const r = await fetch(`/api/report/${encodeURIComponent(tid)}`);
+    const d = await r.json();
+    if (!d.ok) {
+      out.innerHTML = d.stored === false
+        ? '<p class="err">No report database is configured yet, so reports cannot be looked up. The report was still delivered.</p>'
+        : '<p class="err">No report found with that code. Check the spelling.</p>';
+      return;
+    }
+    const x = d.report;
+    out.innerHTML = `
+      <div class="card">
+        <div class="card-top">
+          <span class="card-tid">${x.tracking_id}</span>
+          <span class="sev sev-${x.severity}">${x.severity}</span>
+        </div>
+        <h2 style="margin-top:8px">${x.category_name}</h2>
+        <p class="card-meta">Routed to <strong>${x.authority_name}</strong></p>
+        <p class="card-meta">${x.address_short || ''}</p>
+        <p class="card-meta">Filed ${fmt(x.created_at)}</p>
+        ${x.photo_url ? `<img class="thumb" style="margin-top:12px" src="${x.photo_url}" alt="Reported scene">
+           <p class="card-meta">This photo is not shown on the public feed until face and number plate blurring is built.</p>` : ''}
+        ${x.note ? `<p class="card-meta">Note: ${x.note}</p>` : ''}
+        <p class="card-meta">Current status: <span class="t-status">${x.status.replace('_', ' ')}</span></p>
+        ${x.lat ? `<p class="card-meta"><a href="https://www.google.com/maps/search/?api=1&query=${x.lat},${x.lng}" target="_blank" rel="noopener">Open location in Maps</a></p>` : ''}
+      </div>`;
+  } catch {
+    out.innerHTML = '<p class="err">Could not reach the server.</p>';
+  }
+}
+
+$('go').onclick = () => { const v = $('tid').value.trim().toUpperCase(); if (v) look(v); };
+$('tid').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('go').click(); });
+
+// Deep link: /track/SPOT-...
+const seg = location.pathname.split('/').filter(Boolean);
+if (seg.length > 1) { $('tid').value = decodeURIComponent(seg[1]).toUpperCase(); look($('tid').value); }
+
+// Local history, a convenience that works with no database at all.
+try {
+  const mine = JSON.parse(localStorage.getItem('spot_reports') || '[]');
+  if (mine.length) {
+    $('mine').hidden = false;
+    $('mine-list').innerHTML = mine.map((m) => `
+      <li class="card"><div class="card-top">
+        <a class="card-tid" href="/track/${m.tid}">${m.tid}</a>
+        <span class="t-at">${fmt(m.at)}</span>
+      </div><p class="card-meta">${m.cat}</p></li>`).join('');
+  }
+} catch { /* private mode */ }
+</script>
+</body>
+</html>

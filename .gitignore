@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# Secrets and local config. Never commit these: the apps read every credential
+# from the environment, so there is no reason for a key to enter git history.
+.env
+.env.*
+!.env.example
+
+# Vercel link metadata, specific to one person's account
+.vercel/
+
+# Local scraped data and logs
+spot-ci/data/history.json
+*.log
+
+# Editor and OS noise
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

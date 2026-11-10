@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b1020">
+<title>Spot India</title>
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+<header class="bar">
+  <div class="brand">
+    <span class="dot" aria-hidden="true"></span>
+    <span>Spot<strong>India</strong></span>
+  </div>
+  <nav class="bar-links">
+    <a href="/feed">Feed</a>
+    <a href="/track">Track</a>
+  </nav>
+</header>
+
+<main id="main">
+
+  <!-- 1. Capture -->
+  <section class="step" id="step-capture" data-step="capture">
+    <h1>Report what you see</h1>
+    <p class="lede">Point your camera at the problem. The photo is analysed on your
+      own phone, then routed to the authority responsible for it.</p>
+
+    <div class="camera-frame" id="camera-frame">
+      <video id="video" playsinline muted autoplay></video>
+      <canvas id="canvas" hidden></canvas>
+      <img id="shot" alt="" hidden>
+      <div class="camera-idle" id="camera-idle">
+        <svg viewBox="0 0 24 24" class="big-icon" aria-hidden="true"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+        <p>Camera is off</p>
+      </div>
+      <button id="btn-flip" class="flip" hidden aria-label="Switch to the other camera" title="Switch camera">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11V9a4 4 0 0 1 4-4h11"/><path d="m15 2 3 3-3 3"/><path d="M21 13v2a4 4 0 0 1-4 4H6"/><path d="m9 22-3-3 3-3"/></svg>
+      </button>
+    </div>
+
+    <div class="actions">
+      <button id="btn-open" class="primary wide">Open camera</button>
+      <button id="btn-shoot" class="primary wide" hidden>Capture photo</button>
+    </div>
+
+    <p class="hint" id="capture-hint">Works best in daylight, with the problem filling the frame.</p>
+    <p class="err" id="camera-err" hidden></p>
+
+    <p class="alt-action" id="alt-action">
+      <label for="file-input" class="as-label">Upload a photo instead</label>
+      <input id="file-input" type="file" accept="image/*" hidden>
+    </p>
+  </section>
+
+  <!-- 2. Analysing -->
+  <section class="step" id="step-analyse" data-step="analyse" hidden>
+    <h1>Analysing the photo</h1>
+    <img id="analyse-thumb" class="thumb" alt="Captured photo">
+    <div class="progress"><div class="progress-bar" id="progress-bar"></div></div>
+    <p class="status" id="analyse-status">Loading the vision model…</p>
+    <p class="hint" id="analyse-note">The model downloads once (about 50 MB) and is
+      then cached on your device, so later reports are instant and work offline.</p>
+    <p class="err" id="analyse-err" hidden></p>
+    <button id="btn-skip-ai" class="ghost">Choose the category myself</button>
+  </section>
+
+  <!-- 3. Confirm category -->
+  <section class="step" id="step-confirm" data-step="confirm" hidden>
+    <h1>Is this right?</h1>
+    <img id="confirm-thumb" class="thumb" alt="Captured photo">
+
+    <p class="caution" id="caution" hidden></p>
+
+    <div class="verdict" id="verdict">
+      <div class="verdict-head">
+        <span class="sev" id="verdict-sev"></span>
+        <h2 id="verdict-name"></h2>
+      </div>
+      <p class="confidence" id="verdict-conf"></p>
+      <p class="routes-to" id="verdict-auth"></p>
+    </div>
+
+    <div class="followup" id="followup" hidden>
+      <label id="followup-q" for="followup-a"></label>
+      <div class="chips" id="followup-chips"></div>
+    </div>
+
+    <details class="alts" id="alts" hidden>
+      <summary>Other possibilities the model considered</summary>
+      <ul id="alts-list"></ul>
+    </details>
+
+    <div class="actions">
+      <button id="btn-yes" class="primary">Yes, continue</button>
+      <button id="btn-no" class="ghost">Pick a different category</button>
+    </div>
+  </section>
+
+  <!-- 4. Manual category picker -->
+  <section class="step" id="step-pick" data-step="pick" hidden>
+    <h1>What are you reporting?</h1>
+    <div id="pick-groups"></div>
+    <button id="btn-pick-back" class="ghost">Back</button>
+  </section>
+
+  <!-- 5. Details + location -->
+  <section class="step" id="step-details" data-step="details" hidden>
+    <h1>Where and what</h1>
+
+    <div class="loc-card" id="loc-card">
+      <div class="loc-row">
+        <svg viewBox="0 0 24 24" class="icon" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        <div>
+          <p class="loc-main" id="loc-main">Finding your location…</p>
+          <p class="loc-sub" id="loc-sub"></p>
+        </div>
+      </div>
+      <button id="btn-reloc" class="link">Retry location</button>
+    </div>
+
+    <label for="note">Add a note <span class="opt">(optional but very useful)</span></label>
+    <textarea id="note" rows="3" maxlength="500"
+      placeholder="Anything the responder should know before arriving."></textarea>
+
+    <label for="reporter">Your name <span class="opt">(optional)</span></label>
+    <input id="reporter" type="text" maxlength="80" placeholder="Anonymous citizen">
+
+    <label for="reply_to">Your email <span class="opt">(optional, for updates)</span></label>
+    <input id="reply_to" type="email" maxlength="120" placeholder="you@example.com">
+
+    <div class="actions">
+      <button id="btn-review" class="primary">Review the message</button>
+      <button id="btn-details-back" class="ghost">Back</button>
+    </div>
+  </section>
+
+  <!-- 6. Review -->
+  <section class="step" id="step-review" data-step="review" hidden>
+    <h1>This is what gets sent</h1>
+    <p class="lede">Read it before it goes. Nothing here was invented by a
+      language model: every line comes from your photo, your location and your note.</p>
+
+    <div class="route-strip" id="route-strip"></div>
+    <div class="nearby-card" id="nearby-card" hidden></div>
+    <p class="test-note" id="test-note" hidden></p>
+    <pre class="message" id="message-preview"></pre>
+
+    <div class="actions">
+      <button id="btn-send" class="primary">Send to authority</button>
+      <button id="btn-review-back" class="ghost">Back</button>
+    </div>
+    <p class="err" id="send-err" hidden></p>
+  </section>
+
+  <!-- 7. Done -->
+  <section class="step" id="step-done" data-step="done" hidden>
+    <div class="done-mark" aria-hidden="true">
+      <svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>
+    </div>
+    <h1>Report filed</h1>
+    <p class="tid" id="done-tid"></p>
+    <p class="lede" id="done-routed"></p>
+
+    <div class="delivery" id="delivery-status"></div>
+
+    <div class="actions column" id="done-actions"></div>
+    <button id="btn-again" class="ghost">Report something else</button>
+  </section>
+
+</main>
+
+<footer class="foot">
+  <span id="cap-badge"></span>
+  <span>Authority contacts are mocked to the product owner during testing.</span>
+</footer>
+
+<script type="module" src="/static/app.js"></script>
+</body>
+</html>

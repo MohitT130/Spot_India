@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Spot India Competitive Intelligence</title>
+<link rel="stylesheet" href="/static/app.css">
+</head>
+<body>
+<header class="top">
+  <div class="brand">
+    <span class="logo" aria-hidden="true">◎</span>
+    <div><b>Spot India</b><span class="sub">Competitive intelligence · owner console</span></div>
+  </div>
+  <div class="live">
+    <span id="liveDot" class="dot"></span>
+    <span id="liveText">Seed data</span>
+    <button id="btnRefresh" class="btn primary">Refresh live data</button>
+    <button id="btnTheme" class="btn ghost" aria-label="Toggle theme">◐</button>
+  </div>
+</header>
+
+<section class="filters" aria-label="Filters">
+  <div class="f-row">
+    <label class="f">From
+      <select id="fFrom"></select>
+    </label>
+    <label class="f grow">As of <b id="asofLabel"></b>
+      <input id="fAsof" type="range" min="0" max="0" step="1">
+    </label>
+    <button id="btnReset" class="btn ghost small">Reset</button>
+  </div>
+  <div class="f-row wrap">
+    <div class="chips" id="chipsComp" role="group" aria-label="Competitors"></div>
+  </div>
+  <div class="f-row wrap">
+    <span class="lbl">Phase</span><div class="chips" id="chipsPhase" role="group" aria-label="Phases"></div>
+    <span class="lbl">Event</span><div class="chips" id="chipsType" role="group" aria-label="Event types"></div>
+  </div>
+</section>
+
+<nav class="tabs" id="tabs" role="tablist">
+  <button data-tab="overview" class="on" role="tab">Overview</button>
+  <button data-tab="growth" role="tab">Growth timeline</button>
+  <button data-tab="journey" role="tab">Phase journey</button>
+  <button data-tab="gaps" role="tab">Feature gaps</button>
+  <button data-tab="roadmap" role="tab">Spot India roadmap</button>
+  <button data-tab="revenue" role="tab">Revenue path</button>
+  <button data-tab="evidence" role="tab">Evidence</button>
+</nav>
+
+<main>
+  <section id="tab-overview" class="tab on"></section>
+  <section id="tab-growth" class="tab"></section>
+  <section id="tab-journey" class="tab"></section>
+  <section id="tab-gaps" class="tab"></section>
+  <section id="tab-roadmap" class="tab"></section>
+  <section id="tab-revenue" class="tab"></section>
+  <section id="tab-evidence" class="tab"></section>
+</main>
+
+<aside id="drawer" class="drawer" aria-live="polite" hidden>
+  <div class="drawer-h"><b>Live scrape</b><button id="drawerClose" class="btn ghost small">Close</button></div>
+  <div id="drawerBody"></div>
+</aside>
+<div id="tip" class="tip" role="tooltip" hidden></div>
+
+<script src="/static/chart.umd.js"></script>
+<script src="/static/app.js"></script>
+</body>
+</html>
